@@ -41,3 +41,29 @@ jobs:
               with:
                 name: Mocha-Test-Result- ${{matrix.nodejs_version}}
                 path: test-results-${{matrix.nodejs_version}}.xml
+
+    code-coverage:
+        name: Code Coverage
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Repository
+            uses: actions/checkout@v6
+
+          - name: Setup NodeJs Version - 24
+            uses: actions/setup-node@v3
+            with:
+              node-version: 24
+
+          - name: Install dependencies
+            run: npm install
+
+          - name: Check Code Coverage
+            run: npm run coverage
+          
+          - name: Archive Test Result
+            uses: actions/upload-artifacts@v3
+            with:
+              name: Code-Coverage Result
+              path: covergae
+              retention-days: 5
+        
