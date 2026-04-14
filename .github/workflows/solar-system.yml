@@ -19,7 +19,7 @@ jobs:
             operating_system: [ubuntu-latest, macos-latest]
             exclude:
               - nodejs_version: 18
-                operating_system: macos-latet
+                operating_system: macos-latest
 
         runs-on: ${{matrix.operating_system}}
         steps:
@@ -27,20 +27,28 @@ jobs:
               uses: actions/Checkout@v6
               
             - name: Setup NodeJS Version - ${{matrix.nodejs_version}}
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                 node-version: ${{matrix.nodejs_version}}
             - name: Install Depencies
               run: npm install
 
             - name: Run Unit Testing
-              run : npm test
+              run: npm test -- --reporter mocha-junit-reporter --reporter-option mochaFile=test-results-${{matrix.nodejs_version}}.xml
             
             - name: Archive Test Result
               uses: actions/upload-artifact@v4
               with:
                 name: Mocha-Test-Result- ${{matrix.nodejs_version}}
                 path: test-results-${{matrix.nodejs_version}}.xml
+
+            - name: Publish Test Results
+              uses: dorny/test-reporter@v1
+              if: always()                    # Run even if tests fail
+              with:
+                name: Mocha Tests (${{matrix.nodejs_version}})
+                path: test-results-${{matrix.nodejs_version}}.xml
+                reporter: mocha-junit
 
     code-coverage:
         name: Code Coverage
@@ -65,6 +73,6 @@ jobs:
             uses: actions/upload-artifact@v4
             with:
               name: Code-Coverage Result
-              path: covergae
+              path: coverage
               retention-days: 5
-        
+    
