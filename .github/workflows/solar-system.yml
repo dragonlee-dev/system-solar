@@ -38,14 +38,14 @@ jobs:
       - name: Run Unit Tests
         run: npm test -- --reporter mocha-junit-reporter --reporter-option mochaFile=test-results-${{ matrix.nodejs_version }}.xml
 
-      - name: Publish Test Results   # ← This makes results nicely visible
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Mocha Tests (${{ matrix.nodejs_version }} - ${{ matrix.operating_system }})
-          path: test-results-${{ matrix.nodejs_version }}.xml
-          reporter: java-junit
-          fail-on-error: false
+      # - name: Publish Test Results   # ← This makes results nicely visible
+      #   uses: dorny/test-reporter@v1
+      #   if: always()
+      #   with:
+      #     name: Mocha Tests (${{ matrix.nodejs_version }} - ${{ matrix.operating_system }})
+      #     path: test-results-${{ matrix.nodejs_version }}.xml
+      #     reporter: java-junit
+      #     fail-on-error: false
 
       - name: Archive Test Result
         if: always()
