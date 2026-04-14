@@ -1,0 +1,83 @@
+name: Solar System Workflow
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'feature/*']
+
+env:
+  MONGO_URI: 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'
+  MONGO_USERNAME: ${{ vars.MONGO_USERNAME }}
+  MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+
+jobs:
+  unit-testing:
+    name: Unit-Testing
+    strategy:
+      matrix:
+        nodejs_version: [18, 20, 22]   # 24 may be too new; adjust as needed
+        operating_system: [ubuntu-latest, macos-latest]
+        exclude:
+          - nodejs_version: 18
+            operating_system: macos-latest
+
+    runs-on: ${{ matrix.operating_system }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.nodejs_version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.nodejs_version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Unit Tests
+        run: npm test
+
+      # - name: Publish Test Results   # ← This makes results nicely visible
+      #   uses: dorny/test-reporter@v1
+      #   if: always()
+      #   with:
+      #     name: Mocha Tests (${{ matrix.nodejs_version }} - ${{ matrix.operating_system }})
+      #     path: test-results-${{ matrix.nodejs_version }}.xml
+      #     reporter: java-junit
+      #     fail-on-error: false
+
+      - name: Archive Test Result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mocha-test-results-${{ matrix.nodejs_version }}
+          path: test-results-${{ matrix.nodejs_version }}.xml
+
+  code-coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Code Coverage
+        continue-on-error: true
+        run: npm run coverage
+
+      - name: Archive Coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: coverage/          # Fixed typo + use folder (or coverage/lcov-report etc.)
+          retention-days: 7
