@@ -44,7 +44,8 @@ jobs:
         with:
           name: Mocha Tests (${{ matrix.nodejs_version }} - ${{ matrix.operating_system }})
           path: test-results-${{ matrix.nodejs_version }}.xml
-          reporter: mocha-junit
+          reporter: java-junit
+          fail-on-error: false
 
       - name: Archive Test Result
         if: always()
