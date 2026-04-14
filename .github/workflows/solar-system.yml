@@ -36,7 +36,7 @@ jobs:
         run: npm install
 
       - name: Run Unit Tests
-        run: npm test -- --reporter mocha-junit-reporter --reporter-option mochaFile=test-results-${{ matrix.nodejs_version }}.xml
+        run: npm test
 
       # - name: Publish Test Results   # ← This makes results nicely visible
       #   uses: dorny/test-reporter@v1
